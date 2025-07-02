@@ -1,0 +1,64 @@
+import cv2
+import serial
+import time
+
+# Arduino bağlantısı
+arduino = serial.Serial('COM3', 9600)
+time.sleep(2)
+
+cap = cv2.VideoCapture(2)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+
+if not cap.isOpened():
+    print("Kamera açılamadı!")
+    exit()
+
+last_renk = None         # Son algılanan renk
+renk_baslama_zamani = 0  # Aynı rengin başladığı zaman
+gonderildi = False       # Aynı renk gönderildi mi?
+
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        print("Görüntü alınamadı!")
+        break
+
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    height, width, _ = frame.shape
+    cx, cy = width // 2, height // 2
+
+    hue = hsv[cy, cx][0]
+    renk = "Undefined"
+
+    if (0 <= hue <= 10) or (170 <= hue <= 180):
+        renk = "KIR"
+    elif 20 <= hue <= 35:
+        renk = "SAR"
+    elif 90 <= hue <= 130:
+        renk = "MAV"
+
+    # Renk değiştiyse zaman sıfırlanır
+    if renk != last_renk:
+        last_renk = renk
+        renk_baslama_zamani = time.time()
+        gonderildi = False  # Yeni renk, henüz gönderilmedi
+
+    # Aynı renk 5 saniye ise ve daha önce gönderilmediyse Arduino'ya gönder
+    if renk in ["KIR", "SAR", "MAV"]:
+        su_an = time.time()
+        if (su_an - renk_baslama_zamani >= 5) and not gonderildi:
+            print(f"5 saniyedir aynı renk: {renk}. Arduino'ya gönderiliyor.")
+            arduino.write((renk + "\n").encode())
+            gonderildi = True
+
+    # Görsel gösterim
+    cv2.circle(frame, (cx, cy), 5, (0, 0, 0), 3)
+    cv2.putText(frame, renk, (cx - 100, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 0), 3)
+    cv2.imshow("Kamera", frame)
+
+    if cv2.waitKey(1) == 27:  # ESC tuşu çıkışı
+        break
+
+cap.release()
+cv2.destroyAllWindows()
