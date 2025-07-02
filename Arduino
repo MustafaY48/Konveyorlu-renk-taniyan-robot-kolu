@@ -1,0 +1,164 @@
+#include <Wire.h>
+#include <Adafruit_PWMServoDriver.h>
+
+Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
+
+#define SERVO_MIN  150
+#define SERVO_MAX  600
+
+#define SENSOR_PIN 2
+#define MOTOR_PIN1 3
+#define MOTOR_PIN2 4
+#define ENABLE_PIN 5
+
+int steps = 100;
+int delayTime = 10;
+
+int angleToPulse(float angle) {
+  return map(angle, 0, 150, SERVO_MIN, SERVO_MAX);
+}
+
+void rampToAngle(int ch, float start, float target, int steps, int delayTime) {
+  float step = (target - start) / steps;
+  for (int i = 0; i <= steps; i++) {
+    float angle = start + step * i;
+    pwm.setPWM(ch, 0, angleToPulse(angle));
+    delay(delayTime);
+  }
+}
+
+void startConveyor() {
+  digitalWrite(MOTOR_PIN1, HIGH);
+  digitalWrite(MOTOR_PIN2, LOW);
+}
+
+void stopConveyor() {
+  digitalWrite(MOTOR_PIN1, LOW);
+  digitalWrite(MOTOR_PIN2, LOW);
+}
+
+void setup() {
+  Serial.begin(9600);
+  pwm.begin();
+  pwm.setPWMFreq(50);
+  delay(4000);
+
+  pinMode(SENSOR_PIN, INPUT);
+  pinMode(MOTOR_PIN1, OUTPUT);
+  pinMode(MOTOR_PIN2, OUTPUT);
+  pinMode(ENABLE_PIN, OUTPUT);
+  digitalWrite(ENABLE_PIN, HIGH);
+
+  // İlk servo pozisyonları
+  rampToAngle(13, 50, 50, steps, delayTime);
+  delay(1000);
+  rampToAngle(14, 140, 140, steps, delayTime);
+  delay(1000);
+  rampToAngle(12, 0, 0, steps, delayTime);
+  delay(1000);
+  rampToAngle(11, 90, 90, steps, delayTime);
+  delay(1000);
+
+  Serial.println("Başlatıldı. Döngüye giriliyor...");
+}
+
+void loop() {
+  String renk = ""; 
+  startConveyor();
+  Serial.println("Konveyör çalışıyor... Nesne bekleniyor...");
+
+  while (digitalRead(SENSOR_PIN) == HIGH) {
+    delay(100);
+  }
+
+  stopConveyor();  
+   delay(3000);
+  Serial.println("Nesne algılandı. Konveyör durdu.");
+  Serial.println("Renk bekleniyor...");
+  // Renk bilgisi alınana kadar bekle
+  renk = "";
+  while (renk == "") {
+    if (Serial.available()) {
+      renk = Serial.readStringUntil('\n');
+      renk.trim(); // \n ve boşlukları temizle
+    }
+  }
+
+  Serial.print("Algılanan renk: ");
+  Serial.println(renk);
+
+  // === Servo hareketleri renk bilgisine göre ===
+ if (renk.equals("KIR")) {
+    rampToAngle(14, 122, 122, steps, delayTime);
+    rampToAngle(13, 50, 75, steps, delayTime);
+    rampToAngle(15, 0, 0, steps, delayTime);
+    rampToAngle(12, 0, 47, steps, delayTime);
+    rampToAngle(15, 0, 50, steps, delayTime);
+    rampToAngle(12, 47, 10, steps, delayTime);
+    rampToAngle(13, 75, 50, steps, delayTime);
+    rampToAngle(11, 90, 40, steps, delayTime);
+    rampToAngle(14, 122, 140, steps, delayTime);
+    rampToAngle(12, 10, 30, steps, delayTime);
+    rampToAngle(15, 50, 0, steps, delayTime);
+    
+    // === Eklenen son hareketler ===
+    
+    rampToAngle(12, 30, 0, steps, delayTime);
+    rampToAngle(11, 40, 90, steps, delayTime);
+
+    // Başlangıca dön (loop zaten otomatik tekrar eder)
+     renk = "";
+    return;
+  }
+ else if (renk.equals("MAV")) {
+    rampToAngle(14, 122, 122, steps, delayTime);
+    rampToAngle(13, 50, 75, steps, delayTime);
+    rampToAngle(15, 0, 0, steps, delayTime);
+    rampToAngle(12, 0, 47, steps, delayTime);
+    rampToAngle(15, 0, 50, steps, delayTime);
+    rampToAngle(12, 47, 10, steps, delayTime);
+    rampToAngle(13, 75, 50, steps, delayTime);
+    rampToAngle(11, 90, 0, steps, delayTime);
+    rampToAngle(14, 122, 140, steps, delayTime);
+    rampToAngle(12, 10, 30, steps, delayTime);
+    rampToAngle(15, 50, 0, steps, delayTime);
+    
+    // === Eklenen son hareketler ===
+    
+    rampToAngle(12, 30, 0, steps, delayTime);
+    rampToAngle(11, 40, 90, steps, delayTime);
+
+    // Başlangıca dön (loop zaten otomatik tekrar eder)
+     renk = "";
+    return;
+  }
+ else if (renk.equals("SAR")) {
+    rampToAngle(14, 122, 122, steps, delayTime);
+    rampToAngle(13, 50, 75, steps, delayTime);
+    rampToAngle(15, 0, 0, steps, delayTime);
+    rampToAngle(12, 0, 47, steps, delayTime);
+    rampToAngle(15, 0, 50, steps, delayTime);
+    rampToAngle(12, 47, 10, steps, delayTime);
+    rampToAngle(13, 75, 50, steps, delayTime);
+    rampToAngle(11, 90, 120, steps, delayTime);
+    rampToAngle(14, 122, 140, steps, delayTime);
+    rampToAngle(12, 10, 30, steps, delayTime);
+    rampToAngle(15, 50, 0, steps, delayTime);
+    
+    // === Eklenen son hareketler ===
+    
+    rampToAngle(12, 30, 0, steps, delayTime);
+    rampToAngle(11, 40, 90, steps, delayTime);
+
+    // Başlangıca dön (loop zaten otomatik tekrar eder)
+     renk = "";
+    return;
+  }
+  else {
+    Serial.println("Bilinmeyen renk!");
+    renk = ""; 
+  }
+
+  Serial.println("İşlem tamamlandı. Yeni nesne bekleniyor...\n");
+  renk = "";
+}
