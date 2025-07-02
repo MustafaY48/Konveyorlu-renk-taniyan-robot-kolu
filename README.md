@@ -108,7 +108,8 @@ Projenin farklı açılardan çekilmiş görselleri.
 
 ![image](https://github.com/user-attachments/assets/566d30c0-2710-4097-9dc1-6a6fae73db24)
 ![image](https://github.com/user-attachments/assets/b2432e0e-f32e-4e56-8d7c-c353cb2cbb32)
-![image](https://github.com/user-attachments/assets/7d2c9ca4-7fe7-4363-a3ee-a11adfbdd4bf)
+![image](https://github.com/user-attachments/assets/87bb5fed-da63-4437-9511-229092ffbcba)
+
 
 🤝 Katkıda Bulunma
 Katkılarınız projeyi daha da ileriye taşıyacaktır! Lütfen bir "pull request" açmaktan veya "issue" oluşturmaktan çekinmeyin.
